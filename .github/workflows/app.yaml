@@ -1,0 +1,43 @@
+name: orders-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/orders-api/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write 
+  contents: read
+
+env:
+  REGION: southamerica-east1
+  REPOSITORY: lab-images
+  IMAGE: orders-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Configurar Docker pro Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build e push
+        working-directory: apps/orders-api
+        run: |
+          IMAGE_URL="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}"
+          docker build --platform linux/amd64 \
+            -t "$IMAGE_URL:${{ github.sha }}" \
+            -t "$IMAGE_URL:latest" \
+            .
+          docker push "$IMAGE_URL:${{ github.sha }}"
+          docker push "$IMAGE_URL:latest"
