@@ -80,7 +80,6 @@ module "artifact_registry" {
 
   depends_on = [google_project_service.artifactregistry]
 }
-# teste 
 # ==============================================================================
 # DNS - IP fixo + registro na Cloudflare
 # ==============================================================================
