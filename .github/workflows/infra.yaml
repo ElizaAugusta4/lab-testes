@@ -54,6 +54,7 @@ jobs:
   terraform:
     needs: lint
     runs-on: ubuntu-latest
+    environment: DEV 
     steps:
       - uses: actions/checkout@v4
 
@@ -70,4 +71,19 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        if: github.event_name ==
+        if: github.event_name == 'pull_request' || inputs.action == 'plan'
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform plan -no-color
+        env:
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+
+      - name: Terraform Apply
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'apply'
+        working-directory: ${{ env.WORKING_DIR }}
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
