@@ -73,9 +73,9 @@ resource "google_storage_bucket_iam_member" "ci_state_access" {
 module "artifact_registry" {
   source = "../../modules/artifact-registry"
 
-  project_id                = var.project_id
-  region                    = var.region
-  ci_service_account_email  = module.github_oidc.service_account_email
+  project_id               = var.project_id
+  region                   = var.region
+  ci_service_account_email = module.github_oidc.service_account_email
 
   depends_on = [module.apis]
 }
