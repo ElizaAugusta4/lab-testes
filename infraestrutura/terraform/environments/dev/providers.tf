@@ -12,8 +12,10 @@ terraform {
     }
   }
 
-  # Em producao de verdade, isso apontaria pra um backend remoto (GCS,
-  # por exemplo) - deixado local aqui pra simplicidade do lab.
+  backend "gcs" {
+    bucket = "lab-observability-tfstate"
+    prefix = "environments/dev"
+  }
 }
 
 provider "google" {

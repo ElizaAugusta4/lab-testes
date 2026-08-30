@@ -1,28 +1,17 @@
 # ==============================================================================
-# APIs necessarias no projeto
+# APIs do projeto que o Terraform PODE gerenciar (veja o README sobre a
+# Cloud Resource Manager API, que precisa ser habilitada manualmente antes)
 # ==============================================================================
-resource "google_project_service" "compute" {
-  project            = var.project_id
-  service            = "compute.googleapis.com"
-  disable_on_destroy = false
-}
+module "apis" {
+  source = "../../modules/project-apis"
 
-resource "google_project_service" "container" {
-  project            = var.project_id
-  service            = "container.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "artifactregistry" {
-  project            = var.project_id
-  service            = "artifactregistry.googleapis.com"
-  disable_on_destroy = false
-}
-
-resource "google_project_service" "iamcredentials" {
-  project            = var.project_id
-  service            = "iamcredentials.googleapis.com" # necessario pro Workload Identity Federation
-  disable_on_destroy = false
+  project_id = var.project_id
+  services = [
+    "compute.googleapis.com",
+    "container.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "iamcredentials.googleapis.com",
+  ]
 }
 
 # ==============================================================================
@@ -34,7 +23,7 @@ module "networking" {
   name_prefix = var.cluster_name
   region      = var.region
 
-  depends_on = [google_project_service.compute]
+  depends_on = [module.apis]
 }
 
 # ==============================================================================
@@ -48,7 +37,7 @@ module "gke" {
   network_id    = module.networking.network_id
   subnetwork_id = module.networking.subnetwork_id
 
-  depends_on = [google_project_service.container]
+  depends_on = [module.apis]
 }
 
 # ==============================================================================
@@ -61,11 +50,21 @@ module "github_oidc" {
   github_repo = var.github_repo
 
   roles = [
-    "roles/container.developer",     # kubectl apply / deploy no GKE
-    "roles/artifactregistry.writer", # push de imagem
+    "roles/compute.networkAdmin",           # VPC, subnet, IP fixo
+    "roles/container.admin",                # cluster GKE completo
+    "roles/artifactregistry.admin",         # repositorio + IAM dele
+    "roles/serviceusage.serviceUsageAdmin", # habilitar APIs
   ]
 
-  depends_on = [google_project_service.iamcredentials]
+  depends_on = [module.apis]
+}
+
+# A CI precisa poder ler/escrever no bucket de state remoto - permissao
+# so nesse bucket especifico, nao no Storage do projeto inteiro.
+resource "google_storage_bucket_iam_member" "ci_state_access" {
+  bucket = "lab-observability-tfstate"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${module.github_oidc.service_account_email}"
 }
 
 # ==============================================================================
@@ -78,14 +77,15 @@ module "artifact_registry" {
   region                   = var.region
   ci_service_account_email = module.github_oidc.service_account_email
 
-  depends_on = [google_project_service.artifactregistry]
+  depends_on = [module.apis]
 }
+
 # ==============================================================================
 # DNS - IP fixo + registro na Cloudflare
 # ==============================================================================
 resource "google_compute_global_address" "lab" {
   name       = "${var.cluster_name}-ip"
-  depends_on = [google_project_service.compute]
+  depends_on = [module.apis]
 }
 
 module "dns" {
