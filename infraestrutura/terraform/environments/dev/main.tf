@@ -21,7 +21,7 @@ resource "google_project_service" "artifactregistry" {
 
 resource "google_project_service" "iamcredentials" {
   project            = var.project_id
-  service            = "iamcredentials.googleapis.com" # necessario pro Workload Identity Federation
+  service            = "iamcredentials.googleapis.com"
   disable_on_destroy = false
 }
 
@@ -61,11 +61,21 @@ module "github_oidc" {
   github_repo = var.github_repo
 
   roles = [
-    "roles/container.developer",     # kubectl apply / deploy no GKE
-    "roles/artifactregistry.writer", # push de imagem
+    "roles/compute.networkAdmin",           # VPC, subnet, IP fixo
+    "roles/container.admin",                # cluster GKE completo
+    "roles/artifactregistry.admin",         # repositorio + IAM dele
+    "roles/serviceusage.serviceUsageAdmin", # habilitar APIs
   ]
 
   depends_on = [google_project_service.iamcredentials]
+}
+
+# A CI precisa poder ler/escrever no bucket de state remoto - permissao
+# so nesse bucket especifico, nao no Storage do projeto inteiro.
+resource "google_storage_bucket_iam_member" "ci_state_access" {
+  bucket = "lab-observability-tfstate"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${module.github_oidc.service_account_email}"
 }
 
 # ==============================================================================
@@ -80,6 +90,7 @@ module "artifact_registry" {
 
   depends_on = [google_project_service.artifactregistry]
 }
+
 # ==============================================================================
 # DNS - IP fixo + registro na Cloudflare
 # ==============================================================================
