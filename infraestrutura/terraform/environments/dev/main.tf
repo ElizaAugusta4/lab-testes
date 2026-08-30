@@ -50,10 +50,10 @@ module "github_oidc" {
   github_repo = var.github_repo
 
   roles = [
-    "roles/compute.networkAdmin",           # VPC, subnet, IP fixo
-    "roles/container.admin",                # cluster GKE completo
-    "roles/artifactregistry.admin",         # repositorio + IAM dele
-    "roles/serviceusage.serviceUsageAdmin", # habilitar APIs
+    "roles/compute.networkAdmin",
+    "roles/container.admin",
+    "roles/artifactregistry.admin",
+    "roles/serviceusage.serviceUsageAdmin",
   ]
 
   depends_on = [module.apis]
