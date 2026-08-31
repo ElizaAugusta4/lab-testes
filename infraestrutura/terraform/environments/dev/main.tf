@@ -66,7 +66,7 @@ module "github_oidc" {
 # so nesse bucket especifico, nao no Storage do projeto inteiro.
 resource "google_storage_bucket_iam_member" "ci_state_access" {
   bucket = "lab-observability-tfstate"
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.admin"
   member = "serviceAccount:${module.github_oidc.service_account_email}"
 }
 
