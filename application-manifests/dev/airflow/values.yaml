@@ -3,8 +3,34 @@ executor: LocalExecutor
 images:
   airflow:
     repository: apache/airflow
-    tag: latest 
+    tag: latest # troque por uma tag fixa (ex: 3.0.x) antes de qualquer coisa mais seria
 
+# ==============================================================================
+# FIX CRITICO: sem isso, o Job de migracao do banco nunca roda quando o
+# chart e instalado via ArgoCD (em vez de "helm install" nativo). O chart
+# usa Helm hooks (post-install) pra disparar esse Job, mas o ArgoCD nao
+# processa hooks do mesmo jeito - trava num "chicken-egg" onde tudo fica
+# esperando a migracao, e a migracao nunca dispara. Documentado
+# oficialmente pelo proprio Airflow.
+# ==============================================================================
+createUserJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+
+migrateDatabaseJob:
+  useHelmHooks: false
+  applyCustomEnv: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+# DAGs entregues via git-sync, direto do nosso repositorio - sem precisar
+# buildar uma imagem customizada so pra copiar os DAGs pra dentro. Sempre
+# que o airflow/dags/ mudar no Git, o Airflow pega a versao nova sozinho.
 dags:
   gitSync:
     enabled: true
@@ -12,7 +38,16 @@ dags:
     branch: main
     subPath: airflow/dags
     wait: 60
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
+# Componentes que nao precisamos nesse lab - desligados pra economizar
+# recurso (mesma licao do Autopilot/cota de CPU do resto do projeto)
 triggerer:
   enabled: false
 
@@ -25,7 +60,8 @@ flower:
 redis:
   enabled: false
 
-webserver:
+# No Airflow 3, "webserver" virou "apiServer" - componente novo, chave nova.
+apiServer:
   replicas: 1
   resources:
     requests:
@@ -36,6 +72,14 @@ webserver:
       memory: 768Mi
   service:
     type: ClusterIP
+  logGroomerSidecar:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
 
 scheduler:
   replicas: 1
@@ -46,8 +90,29 @@ scheduler:
     limits:
       cpu: 300m
       memory: 512Mi
+  logGroomerSidecar:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
 
+# Componente NOVO do Airflow 3 - antes, o parsing de DAG rodava dentro do
+# proprio scheduler; agora e um Deployment separado.
+dagProcessor:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
 
+# Banco de metadados PROPRIO do Airflow - de proposito separado do
+# postgres da orders-api, pra nao misturar schema de app com schema
+# interno do orquestrador.
 postgresql:
   enabled: true
   primary:
@@ -60,10 +125,10 @@ postgresql:
         memory: 256Mi
 
 ingress:
-  enabled: false 
+  enabled: false # acesso via port-forward, evita mais um Load Balancer
 
 config:
   webserver:
     expose_config: "False"
   core:
-    load_examples: "False" 
+    load_examples: "False" # sem DAGs de exemplo, so o nosso
