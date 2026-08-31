@@ -73,3 +73,11 @@
 - [ ] **Query lenta visível nos dois sistemas** - o `/orders` tem 10% de
       chance de simular lentidão; achar isso tanto pelo histograma no
       Prometheus quanto pelo log de `duration_ms` alto no Loki
+
+## GitOps (ArgoCD)
+
+- [] **CRD do kube-prometheus-stack falhando ao sincronizar no ArgoCD** - A Application `kube-prometheus-stack` no ArgoCD ficava presa em `SyncFailed`.
+Vários recursos do tipo `CustomResourceDefinition` (`prometheuses`,
+`alertmanagers`, `alertmanagerconfigs`, `scrapeconfigs`, `prometheusagents`,
+`thanosrulers`) falhavam com o mesmo erro. Correção: no `syncOptions` da Application, trocar `ServerSideApply=true` por
+`Replace=true`.
