@@ -1,0 +1,69 @@
+executor: LocalExecutor
+
+images:
+  airflow:
+    repository: apache/airflow
+    tag: latest 
+
+dags:
+  gitSync:
+    enabled: true
+    repo: https://github.com/ElizaAugusta4/lab-testes.git
+    branch: main
+    subPath: airflow/dags
+    wait: 60
+
+triggerer:
+  enabled: false
+
+statsd:
+  enabled: false
+
+flower:
+  enabled: false
+
+redis:
+  enabled: false
+
+webserver:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 300m
+      memory: 768Mi
+  service:
+    type: ClusterIP
+
+scheduler:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+
+postgresql:
+  enabled: true
+  primary:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+ingress:
+  enabled: false 
+
+config:
+  webserver:
+    expose_config: "False"
+  core:
+    load_examples: "False" 
