@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/ElizaAugusta4/lab-testes.git
     targetRevision: main
-    path: agriness-helm/generic-app
+    path: helm/generic-app
     helm:
       valueFiles:
         - ../../application-manifests/dev/demo-apps/hello-app/values.yaml
