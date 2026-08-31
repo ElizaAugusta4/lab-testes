@@ -1,0 +1,16 @@
+{{ include "generic-app.fullname" . }} instalado no namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+
+Acesse em: https://{{ .Values.ingress.host }}
+(pode levar de 15 a 60 minutos ate o certificado ficar Active na primeira vez)
+{{- else if .Values.service.enabled }}
+
+Sem Ingress - acesse internamente via:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "generic-app.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+{{- end }}
+
+{{- if .Values.serviceMonitor.enabled }}
+
+Metricas sendo raspadas pelo Prometheus em {{ .Values.serviceMonitor.path }}.
+{{- end }}

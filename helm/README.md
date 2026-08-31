@@ -1,28 +1,26 @@
-# helm/ - values organizados por chart e ambiente
+# helm
 
-```
-helm/values/<chart>/<ambiente>.yaml
-```
+Charts Helm proprios (nao charts de terceiros - esses ficam so
+referenciados por `chart:`/`repoURL` direto nas Applications do
+`argo-applications/`, sem copiar codigo pro nosso repo).
 
-## Instalar/atualizar (dev)
+## Charts
 
-```bash
-helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --create-namespace \
-  -f values/kube-prometheus-stack/dev.yaml
+- `generic-app/` - reutilizavel pra apps simples sem estado (hello-app,
+  orders-api, metrics-demo). Segue o padrao oficial do scaffold do Helm
+  (`labels`/`selectorLabels` separados, `NOTES.txt`, `ServiceAccount`
+  opcional).
+- `postgres/` - banco de dados do lab. Simples, sem HA, sem persistencia
+  real por padrao (`persistence.enabled: false`).
 
-helm upgrade --install loki grafana/loki \
-  --namespace monitoring \
-  -f values/loki/dev.yaml
-
-helm upgrade --install alloy grafana/alloy \
-  --namespace monitoring \
-  -f values/alloy/dev.yaml
-```
-
-## Adicionar um ambiente novo
+## Testar um chart sem instalar
 
 ```bash
-cp values/kube-prometheus-stack/dev.yaml values/kube-prometheus-stack/staging.yaml
-# ajusta o que for diferente (recursos, retention, etc)
+cd generic-app
+helm template minha-app . -f ../../application-manifests/dev/demo-apps/hello-app/values.yaml
 ```
+
+## Onde ficam os values de cada app
+
+Nao aqui - em `application-manifests/`. Esse repo so tem os *templates*,
+nunca valores especificos de app ou ambiente.

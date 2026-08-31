@@ -1,0 +1,33 @@
+image:
+  repository: postgres
+  tag: "17-alpine"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ATENCAO: isso fica em texto claro no values.yaml, o que NAO e pratica
+# de producao de verdade (o certo seria Vault, Sealed Secrets ou External
+# Secrets Operator - e o que a Agriness faz de verdade, lembra do
+# vault_kv_secret_v2 que vimos no cloudsql.tf). Deixado simples aqui
+# de proposito, pra nao aumentar ainda mais o escopo do lab.
+credentials:
+  user: orders_api
+  password: "troque-essa-senha-lab"
+  database: ordersdb
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClassName: ""
+
+service:
+  port: 5432

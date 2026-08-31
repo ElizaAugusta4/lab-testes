@@ -1,0 +1,9 @@
+nameOverride: postgres
+
+persistence:
+  enabled: false  # emptyDir - dados somem se o pod reiniciar (ok pro lab)
+
+credentials:
+  user: orders_api
+  password: "troque-essa-senha-lab"
+  database: ordersdb

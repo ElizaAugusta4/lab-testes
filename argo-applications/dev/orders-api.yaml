@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: orders-api
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1" # sobe depois do postgres (wave 0)
+spec:
+  project: lab
+  source:
+    repoURL: https://github.com/ElizaAugusta4/lab-testes.git
+    targetRevision: main
+    path: agriness-helm/generic-app
+    helm:
+      valueFiles:
+        - ../../application-manifests/dev/demo-apps/orders-api/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

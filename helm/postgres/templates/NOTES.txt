@@ -1,0 +1,8 @@
+Postgres instalado no namespace {{ .Release.Namespace }}, acessivel em
+"postgres:{{ .Values.service.port }}" pra qualquer pod no mesmo namespace.
+
+{{- if not .Values.persistence.enabled }}
+
+ATENCAO: persistence.enabled=false - dados NAO sobrevivem a um restart
+do pod. Aceitavel pro lab, nao usar assim em producao.
+{{- end }}

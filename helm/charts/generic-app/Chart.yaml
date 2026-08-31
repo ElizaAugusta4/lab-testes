@@ -1,6 +1,0 @@
-apiVersion: v2
-name: generic-app
-description: Chart reutilizavel pros apps simples do lab (hello-app, orders-api, metrics-demo) - mesmo padrao da agriness-applications-v1 que estudamos
-type: application
-version: 0.1.0
-appVersion: "1.0"
