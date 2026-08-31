@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/ElizaAugusta4/lab-testes.git
     targetRevision: main
-    path: agriness-helm/postgres
+    path: helm/postgres
     helm:
       valueFiles:
         - ../../application-manifests/dev/demo-apps/postgres/values.yaml
