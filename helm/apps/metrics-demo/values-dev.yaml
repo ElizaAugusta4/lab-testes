@@ -1,0 +1,23 @@
+nameOverride: metrics-demo
+
+image:
+  repository: quay.io/brancz/prometheus-example-app
+  tag: v0.5.0
+
+containerPort: 8080
+
+service:
+  port: 8080
+  targetPort: 8080
+
+serviceMonitor:
+  enabled: true
+  path: /metrics
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 50m
+    memory: 64Mi

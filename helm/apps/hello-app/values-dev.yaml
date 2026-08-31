@@ -1,0 +1,16 @@
+nameOverride: hello-app
+
+image:
+  repository: nginxdemos/hello
+  tag: latest
+
+containerPort: 80
+
+service:
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: true
+  host: hello.lab.elizaaugusta.uk
+  staticIpName: lab-observability-ip

@@ -1,0 +1,36 @@
+# Footprint reduzido, seguindo as mesmas licoes do resto do lab no
+# Autopilot: sem HA, requests pequenos, sem exposicao publica (acesso
+# via port-forward, evita mais um Load Balancer).
+
+global:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+redis:
+  enabled: true
+
+# Nao usamos SSO nesse lab - desliga pra economizar recurso
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
+
+applicationSet:
+  enabled: false

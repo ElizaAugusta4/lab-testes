@@ -26,7 +26,7 @@ singleBinary:
       cpu: 200m
       memory: 256Mi
   persistence:
-    enabled: false 
+    enabled: false
   extraVolumes:
     - name: loki-data
       emptyDir: {}
@@ -42,7 +42,7 @@ backend:
   replicas: 0
 
 gateway:
-  enabled: false 
+  enabled: false
 
 chunksCache:
   enabled: false

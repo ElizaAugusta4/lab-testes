@@ -1,0 +1,32 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "generic-app.fullname" . }}-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  domains:
+    - {{ .Values.ingress.host }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "generic-app.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "{{ .Values.ingress.staticIpName }}"
+    networking.gke.io/managed-certificates: "{{ include "generic-app.fullname" . }}-cert"
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "generic-app.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}

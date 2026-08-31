@@ -1,0 +1,80 @@
+# Values pro kube-prometheus-stack, ajustados pra:
+# 1. Ficar barato no Autopilot (requests pequenos, sem persistencia)
+# 2. Nao expor Grafana via LB proprio (evita um segundo Load Balancer)
+# 3. Desligar coletores que nao funcionam no GKE (o control plane e
+#    gerenciado pelo Google, essas metricas nao ficam acessiveis)
+
+grafana:
+  adminPassword: "troque-essa-senha-depois"
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+prometheus:
+  prometheusSpec:
+    retention: 6h # curto de proposito, sem persistencia (dados somem se o pod reiniciar)
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+alertmanager:
+  enabled: false # nao precisamos de alertas nesse lab
+
+# GKE gerencia o control plane - essas metricas nunca ficam acessiveis,
+# entao os targets ficariam sempre "down" se deixados ligados.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# node-exporter precisa de hostNetwork/hostPID e montar /proc e /sys do
+# node - tudo isso e proibido no Autopilot (voce nao tem acesso direto
+# ao node, o Google que gerencia). Sem isso perdemos metricas de
+# infraestrutura (CPU/disco do node em si), mas mantemos as metricas
+# dos nossos apps, que e o foco do lab.
+nodeExporter:
+  enabled: false
+
+# Tentaria editar o Service do CoreDNS dentro do kube-system, que e um
+# namespace gerenciado no Autopilot - tambem bloqueado.
+coreDns:
+  enabled: false
+kubeDns:
+  enabled: false
+
+# Sem isso, o Autopilot aplica um default proprio (bem mais generoso do
+# que uma metrica simples precisa) - foi o que consumiu a "reserva" de
+# memoria dos nodes sem voce perceber no kubectl top.
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

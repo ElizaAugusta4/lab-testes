@@ -1,18 +1,3 @@
-# Banco de dados pra API - roda DENTRO do cluster, sem custo de Cloud SQL
-# separado. Sem volume persistente de proposito (emptyDir): se o pod
-# reiniciar, os dados somem - e um otimo incidente pra documentar depois.
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-credentials
-  namespace: demo-apps
-type: Opaque
-stringData:
-  POSTGRES_USER: orders_api
-  POSTGRES_PASSWORD: "troque-essa-senha-lab"
-  POSTGRES_DB: ordersdb
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,16 +37,3 @@ spec:
       volumes:
         - name: data
           emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres
-  namespace: demo-apps
-spec:
-  selector:
-    app: postgres
-  ports:
-    - port: 5432
-      targetPort: 5432
-  type: ClusterIP
