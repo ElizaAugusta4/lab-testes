@@ -6,5 +6,7 @@ resources:
   - ../../base/postgres
   - ../../base/monitoring-extras
 
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false
