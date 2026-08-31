@@ -54,6 +54,8 @@ module "github_oidc" {
     "roles/container.admin",
     "roles/artifactregistry.admin",
     "roles/serviceusage.serviceUsageAdmin",
+    "roles/iam.workloadIdentityPoolViewer",
+    "roles/iam.serviceAccountViewer",
   ]
 
   depends_on = [module.apis]
