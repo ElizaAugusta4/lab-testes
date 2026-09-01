@@ -19,10 +19,10 @@ createUserJob:
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 156Mi
     limits:
-      cpu: 300m
-      memory: 512Mi
+      cpu: 200m
+      memory: 412Mi
 
 migrateDatabaseJob:
   useHelmHooks: false
