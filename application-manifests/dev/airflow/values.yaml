@@ -72,14 +72,6 @@ apiServer:
       memory: 768Mi
   service:
     type: ClusterIP
-  logGroomerSidecar:
-    resources:
-      requests:
-        cpu: 20m
-        memory: 128Mi
-      limits:
-        cpu: 100m
-        memory: 256Mi
 
 scheduler:
   replicas: 1
