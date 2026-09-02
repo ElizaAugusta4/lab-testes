@@ -45,6 +45,3 @@ dex:
 
 notifications:
   enabled: false
-
-applicationSet:
-  enabled: false
