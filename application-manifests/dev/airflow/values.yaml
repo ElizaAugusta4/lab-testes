@@ -84,10 +84,10 @@ scheduler:
   replicas: 1
   resources:
     requests:
-      cpu: 200m        # era 100m
+      cpu: 500m        # era 100m
       memory: 384Mi
     limits:
-      cpu: 500m        # era 300m
+      cpu: 700m        # era 300m
       memory: 512Mi
   startupProbe:
     timeoutSeconds: 30
